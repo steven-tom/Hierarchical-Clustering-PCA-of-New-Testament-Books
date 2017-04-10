@@ -1,0 +1,79 @@
+---
+title: "Hierarchical Clustering & PCA of New Testament Books"
+author: "Steven Lam"
+output: pdf_document
+---
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=10, fig.height=8}
+library(SnowballC)
+library(tm)
+library(tidyr)
+library(plyr)
+library(dplyr)
+library(MASS)
+library(e1071)
+setwd("/Users/Steven_Tom/Desktop/Hierarchical_Clustering_NT/NewTestament/Combined")
+
+matthew <-  readChar('Matthew.txt', file.info('Matthew.txt')$size)
+mark <-  readChar('Mark.txt', file.info('Mark.txt')$size)
+luke <-  readChar('Luke.txt', file.info('Luke.txt')$size)
+john <-  readChar('John.txt', file.info('John.txt')$size)
+
+acts <-  readChar('Acts.txt', file.info('Acts.txt')$size)
+
+peter_1 <-  readChar('1Peter.txt', file.info('1Peter.txt')$size)
+peter_2 <-  readChar('2Peter.txt', file.info('2Peter.txt')$size)
+
+hebrews <-  readChar('Hebrews.txt', file.info('Hebrews.txt')$size)
+
+titus <-  readChar('Titus.txt', file.info('Titus.txt')$size)
+timothy_1 <-  readChar('1Timothy.txt', file.info('1Timothy.txt')$size)
+timothy_2 <-  readChar('2Timothy.txt', file.info('2Timothy.txt')$size)
+philemon <-  readChar('Philemon.txt', file.info('Philemon.txt')$size)
+
+
+ephesians <-  readChar('Ephesians.txt', file.info('Ephesians.txt')$size)
+romans <- readChar('Romans.txt', file.info('Romans.txt')$size)
+
+corinthians_1 <- readChar('1Corinthians.txt', file.info('1Corinthians.txt')$size)
+corinthians_2 <- readChar('2Corinthians.txt', file.info('2Corinthians.txt')$size)
+
+galatians <- readChar('Galatians.txt', file.info('Galatians.txt')$size)
+james <- readChar('James.txt', file.info('James.txt')$size)
+
+revealation <- readChar('Revelation.txt', file.info('Revelation.txt')$size)
+
+
+df1 <-  data.frame(rbind(matthew, mark, luke, john,acts, peter_1 ,peter_2,hebrews ,titus,timothy_1,timothy_2,philemon,ephesians, romans, corinthians_1,corinthians_2,galatians,james, revealation ))
+
+data_corpus <- Corpus(DataframeSource(df1))
+data_corpus <- tm_map(data_corpus, content_transformer(tolower))
+data_corpus <- tm_map(data_corpus, removePunctuation)
+data_corpus <- tm_map(data_corpus, removeNumbers)
+data_corpus <- tm_map(data_corpus, removeWords, stopwords("en"))
+
+data_corpus <- tm_map(data_corpus,stemDocument)
+data_corpus <-tm_map(data_corpus,stripWhitespace)
+data_corpus <- tm_map(data_corpus, PlainTextDocument)
+
+
+tdm <- DocumentTermMatrix(data_corpus)
+train <- as.matrix(tdm) %>% 
+  as.data.frame()
+
+row.names(train) <- c('matthew','mark','luke','john','acts' , 'peter_1' ,'peter_2' ,'hebrews', 'titus','timothy_1','timothy_2','philemon', 'ephesians', 'romans', 'corinthians_1','corinthians_2','galatians' ,'james', 'revealation' )
+
+
+clusters <- hclust(dist(train)) 
+plot(clusters, xlab='Books in the New Testament')
+
+
+PCA_NT <-  prcomp(train)
+summary(PCA_NT)
+
+biplot(PCA_NT)
+```
+
+
+
